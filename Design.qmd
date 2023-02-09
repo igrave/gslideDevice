@@ -23,3 +23,21 @@ Based on `rgoogleslides` and `devout` I will attempt to make a google slides gra
 `polygon` Not implemented in slides API. Possibly implement as grouped triangles using triangulation function
 
 `close` commit to slides
+
+## To Do
+
+-   set correct size for slides
+
+-   add text width function
+
+-   calculate text box size
+
+-   rotate text boxes and center text
+
+-   polygons
+
+-   delay writes
+
+-   colours
+
+-   Only group polyline if segments \> 1
