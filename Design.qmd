@@ -1,0 +1,25 @@
+---
+title: "Design gslideDevice"
+format: html
+editor: visual
+---
+
+## gslideDevice
+
+Based on `rgoogleslides` and `devout` I will attempt to make a google slides graphics device for
+
+## Functions
+
+`open` create a new slide deck
+
+`activate` ?
+
+`newPage` create a new slide
+
+`line`, `circle`, `rect` add calls to batch
+
+`polyline` add lines between points and group
+
+`polygon` Not implemented in slides API. Possibly implement as grouped triangles using triangulation function
+
+`close` commit to slides
