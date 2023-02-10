@@ -41,3 +41,5 @@ Based on `rgoogleslides` and `devout` I will attempt to make a google slides gra
 -   colours
 
 -   Only group polyline if segments \> 1
+
+-   See transformation using reference frames https://developers.google.com/slides/api/guides/transform#element_reference_frames

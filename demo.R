@@ -11,3 +11,5 @@ authorize(
 rdevice(debug_gsd_function, slides_id = "1k38RIlrzaKx2ASie9gzLl6zvZ6bnAGnNz6amY_WcS8w")
 
 plot(1:3)
+
+
