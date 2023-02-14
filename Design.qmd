@@ -43,3 +43,5 @@ Based on `rgoogleslides` and `devout` I will attempt to make a google slides gra
 -   Only group polyline if segments \> 1
 
 -   See transformation using reference frames https://developers.google.com/slides/api/guides/transform#element_reference_frames
+-   use gargle for auth and building requests
+-   include client api instead of using rgoogleslides. Build using googleAuthR
