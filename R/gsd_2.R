@@ -1,7 +1,3 @@
-if (!require("devout")) remotes::install_github('coolbutuseless/devout')
-if (!require("rgoogleslides")) remotes::install_github('igrave/rgoogleslides')
-
-
 new_id <- function(prefix = "ID") {
   paste0(
     prefix, "-",
