@@ -34,3 +34,17 @@ rot_matrix <- function(deg) {
   )
   round(m, 3)
 }
+
+
+#' A helper function that tests whether an object is either NULL _or_
+#' a list of NULLs
+#'
+#' @keywords internal
+is_null_obj <- function(x) is.null(x) | all(sapply(x, is.null))
+#' Recursively step down into list, removing all such objects
+#'
+#' @keywords internal
+rm_null_objs <- function(x) {
+  x <- Filter(Negate(is_null_obj), x)
+  lapply(x, function(x) if (is.list(x)) rm_null_objs(x) else x)
+}
