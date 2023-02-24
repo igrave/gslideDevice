@@ -45,6 +45,9 @@ is_null_obj <- function(x) is.null(x) | all(sapply(x, is.null))
 #'
 #' @keywords internal
 rm_null_objs <- function(x) {
+  class_x <- class(x)
   x <- Filter(Negate(is_null_obj), x)
-  lapply(x, function(x) if (is.list(x)) rm_null_objs(x) else x)
+  x <- lapply(x, function(x) if (is.list(x)) rm_null_objs(x) else x)
+  class(x) <- class_x
+  x
 }
