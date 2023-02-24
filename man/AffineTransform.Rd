@@ -5,29 +5,29 @@
 \title{AffineTransform Object}
 \usage{
 AffineTransform(
-  scaleY = NULL,
-  translateY = NULL,
-  translateX = NULL,
   scaleX = NULL,
+  scaleY = NULL,
   shearX = NULL,
-  unit = NULL,
-  shearY = NULL
+  shearY = NULL,
+  translateX = NULL,
+  translateY = NULL,
+  unit = "PT"
 )
 }
 \arguments{
-\item{scaleY}{The Y coordinate scaling element}
-
-\item{translateY}{The Y coordinate translation element}
-
-\item{translateX}{The X coordinate translation element}
-
 \item{scaleX}{The X coordinate scaling element}
+
+\item{scaleY}{The Y coordinate scaling element}
 
 \item{shearX}{The X coordinate shearing element}
 
-\item{unit}{The units for translate elements}
-
 \item{shearY}{The Y coordinate shearing element}
+
+\item{translateX}{The X coordinate translation element}
+
+\item{translateY}{The Y coordinate translation element}
+
+\item{unit}{The units for translate elements}
 }
 \value{
 AffineTransform object

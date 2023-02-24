@@ -5,20 +5,20 @@
 \title{CreateSlideRequest Object}
 \usage{
 CreateSlideRequest(
+  objectId = NULL,
   insertionIndex = NULL,
   slideLayoutReference = NULL,
-  placeholderIdMappings = NULL,
-  objectId = NULL
+  placeholderIdMappings = NULL
 )
 }
 \arguments{
+\item{objectId}{A user-supplied object ID}
+
 \item{insertionIndex}{The optional zero-based index indicating where to insert the slides}
 
 \item{slideLayoutReference}{Layout reference of the slide to be inserted, based on the \emph{current master}, which is one of the following: - The master of the previous slide index}
 
 \item{placeholderIdMappings}{An optional list of object ID mappings from the placeholder(s) on the layout to the placeholders that are created on the slide from the specified layout}
-
-\item{objectId}{A user-supplied object ID}
 }
 \value{
 CreateSlideRequest object

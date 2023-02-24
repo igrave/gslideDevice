@@ -51,3 +51,9 @@ rm_null_objs <- function(x) {
   class(x) <- class_x
   x
 }
+
+
+
+next_req <- function(state) {
+  length(state$rdata$batch_requests) + 1
+}

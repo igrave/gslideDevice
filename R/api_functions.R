@@ -47,7 +47,6 @@ NULL
 #' See \code{\link[googleAuthR]{gar_auth}} for details.
 #'
 #' @param presentationId The ID of the presentation to retrieve
-#' @importFrom googleAuthR gar_api_generator
 #' @export
 presentations.get <- function(presentationId) {
   request <- gargle::request_build(
@@ -85,7 +84,6 @@ presentations.get <- function(presentationId) {
 #'
 #' @param BatchUpdatePresentationRequest The \link{BatchUpdatePresentationRequest} object to pass to this method
 #' @param presentationId The presentation to apply the updates to
-#' @importFrom googleAuthR gar_api_generator
 #' @family BatchUpdatePresentationRequest functions
 #' @export
 presentations.batchUpdate <- function(BatchUpdatePresentationRequest, presentationId) {
@@ -125,7 +123,6 @@ presentations.batchUpdate <- function(BatchUpdatePresentationRequest, presentati
 #' See \code{\link[googleAuthR]{gar_auth}} for details.
 #'
 #' @param Presentation The \link{Presentation} object to pass to this method
-#' #' @importFrom googleAuthR gar_api_generator
 #' @family Presentation functions
 #' @export
 presentations.create <- function(Presentation) {
@@ -165,7 +162,8 @@ presentations.create <- function(Presentation) {
 #'
 #' @param presentationId The ID of the presentation to retrieve
 #' @param pageObjectId The object ID of the page to retrieve
-#' @importFrom googleAuthR gar_api_generator
+#'
+#' @importFrom gargle request_build request_make response_process
 #' @export
 presentations.pages.get <- function(presentationId, pageObjectId) {
   # url <- sprintf("https://slides.googleapis.com/v1/presentations/%s/pages/%s",
@@ -212,7 +210,7 @@ presentations.pages.get <- function(presentationId, pageObjectId) {
 #' @param thumbnailProperties.thumbnailSize The optional thumbnail image size
 
 #' @param thumbnailProperties.mimeType The optional mime type of the thumbnail image
-#' @importFrom googleAuthR gar_api_generator
+#'
 #' @export
 
 

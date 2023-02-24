@@ -7,8 +7,7 @@
 CreateLineRequest(
   objectId = NULL,
   elementProperties = NULL,
-  lineCategory = NULL,
-  category = NULL
+  category = "LINE_CATEGORY_UNSPECIFIED"
 )
 }
 \arguments{
@@ -16,9 +15,9 @@ CreateLineRequest(
 
 \item{elementProperties}{The element properties for the line}
 
-\item{lineCategory}{The category of the line to be created}
-
 \item{category}{The category of the line to be created}
+
+\item{lineCategory}{The category of the line to be created}
 }
 \value{
 CreateLineRequest object

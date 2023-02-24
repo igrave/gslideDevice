@@ -143,8 +143,8 @@ CreateLineResponse <- function(objectId = NULL) {
 #' @family Dimension functions
 #' @export
 Dimension <- function(magnitude = NULL, unit = NULL) {
-  structure(list(magnitude = magnitude, unit = unit), class = c("gar_Dimension",
-                                                                "list"))
+  structure(list(magnitude = magnitude, unit = unit),
+            class = c("gar_Dimension", "list"))
 }
 
 #' SheetsChartProperties Object
@@ -736,11 +736,26 @@ UpdatePageElementsZOrderRequest <- function(operation = NULL, pageElementObjectI
 #'
 #' @family AffineTransform functions
 #' @export
-AffineTransform <- function(scaleY = NULL, translateY = NULL, translateX = NULL,
-                            scaleX = NULL, shearX = NULL, unit = NULL, shearY = NULL) {
-  structure(list(scaleY = scaleY, translateY = translateY, translateX = translateX,
-                 scaleX = scaleX, shearX = shearX, unit = unit, shearY = shearY), class = c("gar_AffineTransform",
-                                                                                            "list"))
+AffineTransform <- function(
+    scaleX = NULL,
+    scaleY = NULL,
+    shearX = NULL,
+    shearY = NULL,
+    translateX = NULL,
+    translateY = NULL,
+    unit = "PT") {
+  structure(
+    list(
+      scaleX = scaleX,
+      scaleY = scaleY,
+      shearX = shearX,
+      shearY = shearY,
+      translateX = translateX,
+      translateY = translateY,
+      unit = unit
+    ),
+    class = c("gar_AffineTransform", "list")
+  )
 }
 
 #' Response Object
@@ -850,11 +865,18 @@ LayoutPlaceholderIdMapping <- function(layoutPlaceholder = NULL, objectId = NULL
 #'
 #' @family CreateSlideRequest functions
 #' @export
-CreateSlideRequest <- function(insertionIndex = NULL, slideLayoutReference = NULL,
-                               placeholderIdMappings = NULL, objectId = NULL) {
-  structure(list(insertionIndex = insertionIndex, slideLayoutReference = slideLayoutReference,
-                 placeholderIdMappings = placeholderIdMappings, objectId = objectId), class = c("gar_CreateSlideRequest",
-                                                                                                "list"))
+CreateSlideRequest <- function(objectId = NULL,
+                               insertionIndex = NULL,
+                               slideLayoutReference = NULL,
+                               placeholderIdMappings = NULL
+                               ) {
+  structure(list(
+    insertionIndex = insertionIndex,
+    slideLayoutReference = slideLayoutReference,
+    placeholderIdMappings = placeholderIdMappings,
+    objectId = objectId
+  ),
+  class = c("gar_CreateSlideRequest", "list"))
 }
 
 #' ReplaceAllShapesWithImageRequest Object
@@ -1342,9 +1364,10 @@ Thumbnail <- function(height = NULL, contentUrl = NULL, width = NULL) {
 #' @family Request functions
 #' @export
 Request <- function(...) {
-  requests <- lapply(list(...), function(req) {
+  req_list <- list(...)
+  req_types <- lapply(req_list, function(req) {
     req_type <- switch(
-      class(req),
+      class(req)[1],
       "gar_InsertTableColumnsRequest" = "insertTableColumns",
       "gar_DeleteTableColumnRequest" = "deleteTableColumn",
       "gar_UpdateSlidesPositionRequest" = "updateSlidesPosition",
@@ -1390,12 +1413,13 @@ Request <- function(...) {
       "gar_DeleteObjectRequest" = "deleteObject",
       "gar_ReplaceAllTextRequest" = "replaceAllText"
     )
+    # req_type
     req_list <- list()
     req_list[[req_type]] <- req
     req_list
   })
-
-  structure(requests, class = c("gar_Request", "list"))
+  # names(req_list) <- req_types
+  structure(req_types, class = c("gar_Request", "list"))
 }
 
 #' MergeTableCellsRequest Object
@@ -1473,9 +1497,16 @@ UpdateTableRowPropertiesRequest <- function(objectId = NULL, fields = NULL, tabl
 #'
 #' @family PageElementProperties functions
 #' @export
-PageElementProperties <- function(size = NULL, pageObjectId = NULL, transform = NULL) {
-  structure(list(size = size, pageObjectId = pageObjectId, transform = transform),
-            class = c("gar_PageElementProperties", "list"))
+PageElementProperties <- function(pageObjectId = NULL,
+                                  size = NULL,
+                                  transform = NULL) {
+  structure(list(
+    size = size,
+    pageObjectId = pageObjectId,
+    transform = transform
+  ),
+  class = c("gar_PageElementProperties", "list")
+  )
 }
 
 #' UpdateShapePropertiesRequest Object
@@ -2112,10 +2143,13 @@ ReplaceAllTextRequest <- function(replaceText = NULL, containsText = NULL, pageO
 #'
 #' @family CreateLineRequest functions
 #' @export
-CreateLineRequest <- function(objectId = NULL, elementProperties = NULL, lineCategory = NULL,
-                              category = NULL) {
-  structure(list(objectId = objectId, elementProperties = elementProperties, lineCategory = lineCategory,
-                 category = category), class = c("gar_CreateLineRequest", "list"))
+CreateLineRequest <- function(objectId = NULL,
+                              elementProperties = NULL,
+                              category = "LINE_CATEGORY_UNSPECIFIED") {
+  structure(list(objectId = objectId,
+                 elementProperties = elementProperties,
+                 category = category),
+            class = c("gar_CreateLineRequest", "list"))
 }
 
 #' Range Object
@@ -2444,9 +2478,17 @@ TableRange <- function(rowSpan = NULL, location = NULL, columnSpan = NULL) {
 #'
 #' @family CreateShapeRequest functions
 #' @export
-CreateShapeRequest <- function(shapeType = NULL, elementProperties = NULL, objectId = NULL) {
-  structure(list(shapeType = shapeType, elementProperties = elementProperties,
-                 objectId = objectId), class = c("gar_CreateShapeRequest", "list"))
+CreateShapeRequest <- function(objectId = NULL,
+                               shapeType = NULL,
+                               elementProperties = NULL
+                               ) {
+  structure(list(
+    shapeType = shapeType,
+    elementProperties = elementProperties,
+    objectId = objectId
+    ),
+    class = c("gar_CreateShapeRequest", "list")
+  )
 }
 
 #' DeleteObjectRequest Object
@@ -2550,10 +2592,20 @@ Group <- function(children = NULL) {
 #'
 #' @family InsertTextRequest functions
 #' @export
-InsertTextRequest <- function(insertionIndex = NULL, objectId = NULL, text = NULL,
+InsertTextRequest <- function(insertionIndex = NULL,
+                              objectId = NULL,
+                              text = NULL,
                               cellLocation = NULL) {
-  structure(list(insertionIndex = insertionIndex, objectId = objectId, text = text,
-                 cellLocation = cellLocation), class = c("gar_InsertTextRequest", "list"))
+  object <- structure(
+    list(
+      insertionIndex = insertionIndex,
+      objectId = objectId,
+      text = text,
+      cellLocation = cellLocation
+    ),
+    class = c("gar_InsertTextRequest", "list")
+  )
+  rm_null_objs(object)
 }
 
 #' TableBorderProperties Object

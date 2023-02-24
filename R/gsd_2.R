@@ -10,25 +10,45 @@ gsd_circle <- function(args, state) {
   x <- args$x
   y <- args$y
   r <- args$r
-  x1 <- x - r
-  x2 <- x + r
-  y1 <- y - r
-  y2 <- y + r
 
-  slide_element <- page_element_property(state$rdata$slidepage_id, x2 - x1, y2 - y1, 1, 1, 0, 0, x1, y1)
-  request <- add_create_shape_request(shape_type = "ELLIPSE", page_element_property = slide_element)
-  commit_to_slides(state$rdata$slides_id, request)
+  slide_element <- PageElementProperties(
+    pageObjectId = state$rdata$slidepage_id,
+    size = Size(width = Dimension(2*r, "PT"), height = Dimension(2*r, "PT")),
+    transform = AffineTransform(1, 1, 0, 0, x - r, y - r)
+  )
+
+  shape_request <- CreateShapeRequest(
+    objectId = new_id("CIRCLE"),
+    shapeType = "ELLIPSE",
+    elementProperties = slide_element
+  )
+
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- shape_request
   state
 }
 
 gsd_rect <- function(args, state) {
+  x0 <- args$x0
+  y0 <- args$y0
   x1 <- args$x1
   y1 <- args$y1
-  x2 <- args$x2
-  y2 <- args$y2
-  slide_element <- page_element_property(state$rdata$slidepage_id, x2 - x1, y2 - y1, 1, 1, 0, 0, x1, y1)
-  request <- add_create_shape_request(shape_type = "RECTANGLE", page_element_property = slide_element)
-  commit_to_slides(state$rdata$slides_id, request)
+
+  slide_element <- PageElementProperties(
+    pageObjectId = state$rdata$slidepage_id,
+    size = Size(width = Dimension(x1 - x0, "PT"), height = Dimension(y0 - y1, "PT")),
+    transform = AffineTransform(1, 1, 0, 0, x0, y1)
+  )
+
+  shape_request <- CreateShapeRequest(
+    objectId = new_id("RECT"),
+    shapeType = "RECTANGLE",
+    elementProperties = slide_element
+  )
+
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- shape_request
+
   state
 }
 
@@ -39,14 +59,27 @@ gsd_line <- function(args, state) {
   y2 <- args$y2
 
   if (x1 == x2 && y1 == y2) return()
-  # browser()
+
   height <- abs(y2 - y1)
   width <- abs(x2 - x1)
   scale_x <- sign(x2 - x1)
   scale_y <- sign(y2 - y1)
-  slide_element <- page_element_property(state$rdata$slidepage_id, width, height, scale_x, scale_y, 0, 0, x1, y1)
-  request <- add_create_line_request(page_element_property = slide_element)
-  commit_to_slides(state$rdata$slides_id, request)
+
+  slide_element <- PageElementProperties(
+    pageObjectId = state$rdata$slidepage_id,
+    size = Size(width = Dimension(width, "PT"), height = Dimension(height, "PT")),
+    transform = AffineTransform(scale_x, scale_y, 0, 0, x1, y1)
+  )
+
+  shape_request <- CreateLineRequest(
+    objectId = new_id("LINE"),
+    category = "LINE_CATEGORY_UNSPECIFIED",
+    elementProperties = slide_element
+  )
+
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- shape_request
+
   state
 }
 
@@ -62,6 +95,7 @@ gsd_polyline <- function(args, state) {
   y = y[1:n]
   request <-  NULL
 
+  line_ids <- replicate(n-1, new_id("LINE"))
   for(i in seq_len(n-1)){
     x1 <- x[i]
     y1 <- y[i]
@@ -72,13 +106,29 @@ gsd_polyline <- function(args, state) {
     width <- abs(x2 - x1)
     scale_x <- sign(x2 - x1)
     scale_y <- sign(y2 - y1)
-    slide_element <- page_element_property(state$rdata$slidepage_id, width, height, scale_x, scale_y, 0, 0, x1, y1)
-    request <- add_create_line_request(request, page_element_property = slide_element)
+
+
+    slide_element <- PageElementProperties(
+      pageObjectId = state$rdata$slidepage_id,
+      size = Size(width = Dimension(width, "PT"), height = Dimension(height, "PT")),
+      transform = AffineTransform(scale_x, scale_y, 0, 0, x1, y1)
+    )
+
+    line_request <- CreateLineRequest(
+      objectId = line_ids[i],
+      category = "LINE_CATEGORY_UNSPECIFIED",
+      elementProperties = slide_element
+    )
+
+    i <- length(state$rdata$batch_requests)
+    state$rdata$batch_requests[[i + 1]] <- line_request
   }
-  # browser()
-  response <- commit_to_slides(state$rdata$slides_id, request)
-  group_request <- group_objects_request(object_ids = response$replies$createLine$objectId)
-  commit_to_slides(state$rdata$slides_id, group_request)
+
+  if (length(line_ids) > 1) {
+    group_req <- GroupObjectsRequest(groupObjectId = new_id("GROUP"), line_ids)
+    i <- length(state$rdata$batch_requests)
+    state$rdata$batch_requests[[i + 1]] <- group_req
+  }
   state
 }
 
@@ -88,7 +138,7 @@ gsd_polygon <- function(args, state) {
   x <- c(args$x, args$x[1])
   y <- c(args$y, args$y[1])
 
-  request <-  NULL
+  line_ids <- replicate(n, new_id("LINE"))
 
   for(i in seq_len(n)){
     x1 <- x[i]
@@ -100,13 +150,27 @@ gsd_polygon <- function(args, state) {
     width <- abs(x2 - x1)
     scale_x <- sign(x2 - x1)
     scale_y <- sign(y2 - y1)
-    slide_element <- page_element_property(state$rdata$slidepage_id, width, height, scale_x, scale_y, 0, 0, x1, y1)
-    request <- add_create_line_request(request, page_element_property = slide_element)
+    slide_element <- PageElementProperties(
+      pageObjectId = state$rdata$slidepage_id,
+      size = Size(width = Dimension(width, "PT"), height = Dimension(height, "PT")),
+      transform = AffineTransform(scale_x, scale_y, 0, 0, x1, y1)
+    )
+
+    line_request <- CreateLineRequest(
+      objectId = line_ids[i],
+      category = "LINE_CATEGORY_UNSPECIFIED",
+      elementProperties = slide_element
+    )
+
+    i <- length(state$rdata$batch_requests)
+    state$rdata$batch_requests[[i + 1]] <- line_request
   }
-  # browser()
-  response <- commit_to_slides(state$rdata$slides_id, request)
-  group_request <- group_objects_request(object_ids = response$replies$createLine$objectId)
-  commit_to_slides(state$rdata$slides_id, group_request)
+
+  if (length(line_ids) > 1) {
+    group_req <- GroupObjectsRequest(groupObjectId = new_id("GROUP"), line_ids)
+    i <- length(state$rdata$batch_requests)
+    state$rdata$batch_requests[[i + 1]] <- group_req
+  }
   state
 }
 
@@ -125,40 +189,60 @@ gsd_textUTF8 <- function(args, state) {
 
   print(paste0("hadj: ", hadj))
   print(paste0("string: ", str))
-  slide_element <- page_element_property(
-    state$rdata$slidepage_id,
-    width_magnitude = width,
-    height_magnitude = height,
-    scale_x = affine_mat[1, 1],
-    scale_y = affine_mat[2, 2],
-    shear_x = affine_mat[1, 2],
-    shear_y = affine_mat[2, 1],
-    translate_x = affine_mat[1, 3],
-    translate_y = affine_mat[2, 3]
+
+  slide_element <- PageElementProperties(
+    pageObjectId = state$rdata$slidepage_id,
+    size = Size(width = Dimension(width, "PT"), height = Dimension(height, "PT")),
+    transform = AffineTransform(
+      scaleX = affine_mat[1, 1],
+      scaleY = affine_mat[2, 2],
+      shearX = affine_mat[1, 2],
+      shearY = affine_mat[2, 1],
+      translateX = affine_mat[1, 3],
+      translateY = affine_mat[2, 3]
     )
+  )
 
   text_box_id <- new_id("TEXTBOX")
-  request <- add_create_shape_request(
-    shape_type = "TEXT_BOX",
-    page_element_property = slide_element,
-    object_id = text_box_id)
-  request <- add_insert_text_request(
-    request,
-    object_id = text_box_id,
-    text = str,
+  text_box_request <- CreateShapeRequest(
+    objectId = text_box_id,
+    shapeType = "TEXT_BOX",
+    elementProperties = slide_element
   )
-  commit_to_slides(state$rdata$slides_id, request)
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- text_box_request
 
-  args$r <- 1
-  gsd_circle(args, state)
+  text_request <-
+    InsertTextRequest(
+      insertionIndex = 0,
+      objectId = text_box_id,
+      text = str
+    )
+  state$rdata$batch_requests[[next_req(state)]] <- text_request
 
   state
 }
 
+gsd_holdflush <- function(args, state) {
+  print(paste0("level: ", args$level))
+  if (args$level <= 0) {
+    reqs <- do.call(Request, state$rdata$batch_requests)
+    presentations.batchUpdate(
+      presentationId = state$rdata$slides_id,
+      BatchUpdatePresentationRequest = BatchUpdatePresentationRequest(requests = reqs)
+    )
+    state$rdata$batch_requests <- NULL
+  }
+  state
+}
+
 gsd_newPage <- function(args, state) {
-  request <- add_create_slide_page_request(predefined_layout = "BLANK")
-  res <- commit_to_slides(state$rdata$slides_id, request)
-  state$rdata$slidepage_id <- res$replies$createSlide$objectId
+  req <- CreateSlideRequest(slideLayoutReference = LayoutReference(predefinedLayout = "BLANK"))
+  req <- rm_null_objs(req)
+  res <- send_request(req, state)
+  # request <- add_create_slide_page_request(predefined_layout = "BLANK")
+  # res <- commit_to_slides(state$rdata$slides_id, request)
+  state$rdata$slidepage_id <- res$replies[[1]]$createSlide$objectId
 
   state
 }
@@ -200,6 +284,7 @@ debug_gsd_function <- function(device_call, args, state) {
       "open" = gsd_open(args, state),
       "newPage" = gsd_newPage(args, state),
       "textUTF8" = gsd_textUTF8(args, state),
+      "holdflush" = gsd_holdflush(args, state),
       state
       )
   },
@@ -212,7 +297,3 @@ debug_gsd_function <- function(device_call, args, state) {
   state
 }
 
-
-
-
-# invisible(dev.off())

@@ -4,14 +4,14 @@
 \alias{CreateShapeRequest}
 \title{CreateShapeRequest Object}
 \usage{
-CreateShapeRequest(shapeType = NULL, elementProperties = NULL, objectId = NULL)
+CreateShapeRequest(objectId = NULL, shapeType = NULL, elementProperties = NULL)
 }
 \arguments{
+\item{objectId}{A user-supplied object ID}
+
 \item{shapeType}{The shape type}
 
 \item{elementProperties}{The element properties for the shape}
-
-\item{objectId}{A user-supplied object ID}
 }
 \value{
 CreateShapeRequest object

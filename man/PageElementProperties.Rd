@@ -4,12 +4,12 @@
 \alias{PageElementProperties}
 \title{PageElementProperties Object}
 \usage{
-PageElementProperties(size = NULL, pageObjectId = NULL, transform = NULL)
+PageElementProperties(pageObjectId = NULL, size = NULL, transform = NULL)
 }
 \arguments{
-\item{size}{The size of the element}
-
 \item{pageObjectId}{The object ID of the page where the element is located}
+
+\item{size}{The size of the element}
 
 \item{transform}{The transform for the element}
 }

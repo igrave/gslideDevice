@@ -30,7 +30,7 @@ Based on `rgoogleslides` and `devout` I will attempt to make a google slides gra
 
 -   add text width function
 
--   calculate text box size
+-   calculate text box size. Maybe update textbox with Autofit
 
 -   rotate text boxes and center text
 
@@ -40,8 +40,6 @@ Based on `rgoogleslides` and `devout` I will attempt to make a google slides gra
 
 -   colours
 
--   Only group polyline if segments \> 1
-
 -   See transformation using reference frames https://developers.google.com/slides/api/guides/transform#element_reference_frames
--   use gargle for auth and building requests
--   include client api instead of using rgoogleslides. Build using googleAuthR
+
+-   
