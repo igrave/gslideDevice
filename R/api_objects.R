@@ -24,11 +24,24 @@
 #'
 #' @family UpdateParagraphStyleRequest functions
 #' @export
-UpdateParagraphStyleRequest <- function(cellLocation = NULL, textRange = NULL, objectId = NULL,
-                                        fields = NULL, style = NULL) {
-  structure(list(cellLocation = cellLocation, textRange = textRange, objectId = objectId,
-                 fields = fields, style = style), class = c("gar_UpdateParagraphStyleRequest",
-                                                            "list"))
+UpdateParagraphStyleRequest <- function(
+    objectId = NULL,
+    cellLocation = NULL,
+    style = NULL,
+    textRange = NULL,
+    fields = NULL
+) {
+  rm_null_objs(
+    structure(
+      list(
+        cellLocation = cellLocation,
+        textRange = textRange,
+        objectId = objectId,
+        fields = fields,
+        style = style),
+      class = c("gar_UpdateParagraphStyleRequest", "list")
+    )
+  )
 }
 
 #' PageBackgroundFill Object
@@ -2242,8 +2255,17 @@ UngroupObjectsRequest <- function(objectIds = NULL) {
 #' @export
 UpdateTextStyleRequest <- function(style = NULL, objectId = NULL, textRange = NULL,
                                    fields = NULL, cellLocation = NULL) {
-  structure(list(style = style, objectId = objectId, textRange = textRange, fields = fields,
-                 cellLocation = cellLocation), class = c("gar_UpdateTextStyleRequest", "list"))
+  rm_null_objs(
+    structure(
+      list(
+        style = style,
+        objectId = objectId,
+        textRange = textRange,
+        fields = fields,
+        cellLocation = cellLocation
+      ),
+      class = c("gar_UpdateTextStyleRequest", "list"))
+  )
 }
 
 #' InsertTableColumnsRequest Object
