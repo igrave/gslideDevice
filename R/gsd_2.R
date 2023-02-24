@@ -220,6 +220,20 @@ gsd_textUTF8 <- function(args, state) {
     )
   state$rdata$batch_requests[[next_req(state)]] <- text_request
 
+  if (hadj >= 0.5) {
+    text_alignment <- if (hadj == 0.5) {
+      "CENTER"
+    } else if (hadj > 0.5) {
+      "END"
+    }
+    update_style <- UpdateParagraphStyleRequest(
+      objectId = text_box_id,
+      style = ParagraphStyle(alignment = text_alignment),
+      textRange = Range(type = "ALL"),
+      fields = "alignment"
+    )
+    state$rdata$batch_requests[[next_req(state)]] <- update_style
+  }
   state
 }
 
@@ -237,7 +251,8 @@ gsd_holdflush <- function(args, state) {
 }
 
 gsd_newPage <- function(args, state) {
-  req <- CreateSlideRequest(slideLayoutReference = LayoutReference(predefinedLayout = "BLANK"))
+  layout <- state$rdata$layout
+  req <- CreateSlideRequest(slideLayoutReference = LayoutReference(predefinedLayout = layout))
   req <- rm_null_objs(req)
   res <- send_request(req, state)
   # request <- add_create_slide_page_request(predefined_layout = "BLANK")
@@ -251,6 +266,9 @@ gsd_newPage <- function(args, state) {
 gsd_open <- function(args, state) {
   if(is.null(state$rdata$slides_id)) {
     state$rdata$slides_id <- create_slides("gslideDevice")
+  }
+  if(is.null(state$rdata$layout)) {
+    state$rdata$layout <- "BLANK"
   }
 
   state$dd$left <- 0
