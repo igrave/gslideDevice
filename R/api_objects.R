@@ -98,9 +98,10 @@ CreateVideoRequest <- function(objectId = NULL, elementProperties = NULL, source
 #'
 #' @family RgbColor functions
 #' @export
-RgbColor <- function(green = NULL, red = NULL, blue = NULL) {
-  structure(list(green = green, red = red, blue = blue), class = c("gar_RgbColor",
-                                                                   "list"))
+RgbColor <- function(red = NULL, green = NULL, blue = NULL) {
+  structure(
+    list(green = green, red = red, blue = blue),
+    class = c("gar_RgbColor", "list"))
 }
 
 #' UpdateTableBorderPropertiesRequest Object
@@ -587,9 +588,19 @@ CreateSheetsChartRequest <- function(spreadsheetId = NULL, linkingMode = NULL, e
 #'
 #' @family UpdateLinePropertiesRequest functions
 #' @export
-UpdateLinePropertiesRequest <- function(fields = NULL, objectId = NULL, lineProperties = NULL) {
-  structure(list(fields = fields, objectId = objectId, lineProperties = lineProperties),
-            class = c("gar_UpdateLinePropertiesRequest", "list"))
+UpdateLinePropertiesRequest <- function(fields = NULL,
+                                        objectId = NULL,
+                                        lineProperties = NULL) {
+  rm_null_objs(
+    structure(
+      list(
+        objectId = objectId,
+        lineProperties = lineProperties,
+        fields = fields
+      ),
+      class = c("gar_UpdateLinePropertiesRequest", "list")
+    )
+  )
 }
 
 #' BatchUpdatePresentationRequest Object
@@ -1536,9 +1547,18 @@ PageElementProperties <- function(pageObjectId = NULL,
 #'
 #' @family UpdateShapePropertiesRequest functions
 #' @export
-UpdateShapePropertiesRequest <- function(fields = NULL, shapeProperties = NULL, objectId = NULL) {
-  structure(list(fields = fields, shapeProperties = shapeProperties, objectId = objectId),
-            class = c("gar_UpdateShapePropertiesRequest", "list"))
+UpdateShapePropertiesRequest <- function(objectId = NULL,
+                                         shapeProperties = NULL,
+                                         fields = NULL) {
+  rm_null_objs(
+    structure(list(
+      fields = fields,
+      shapeProperties = shapeProperties,
+      objectId = objectId
+    ),
+    class = c("gar_UpdateShapePropertiesRequest", "list")
+    )
+  )
 }
 
 #' UpdateSlidePropertiesRequest Object

@@ -10,6 +10,9 @@ gsd_circle <- function(args, state) {
   x <- args$x
   y <- args$y
   r <- args$r
+  rgba_fill <-  state$gc$fill / 255
+  rgba_col <-  state$gc$col / 255
+
 
   slide_element <- PageElementProperties(
     pageObjectId = state$rdata$slidepage_id,
@@ -17,22 +20,49 @@ gsd_circle <- function(args, state) {
     transform = AffineTransform(1, 1, 0, 0, x - r, y - r)
   )
 
+  circle_id <- new_id("CIRCLE")
   shape_request <- CreateShapeRequest(
-    objectId = new_id("CIRCLE"),
+    objectId = circle_id,
     shapeType = "ELLIPSE",
     elementProperties = slide_element
   )
 
-  i <- length(state$rdata$batch_requests)
-  state$rdata$batch_requests[[i + 1]] <- shape_request
+  fill <- SolidFill(
+    color = OpaqueColor(rgbColor = RgbColor(rgba_fill[1], rgba_fill[2], rgba_fill[3])),
+    alpha = rgba_fill[4]
+  )
+  outline_col <- SolidFill(
+    color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
+    alpha = rgba_col[4]
+  )
+
+  update_style <- UpdateShapePropertiesRequest(
+    objectId = circle_id,
+    shapeProperties = ShapeProperties(
+      shapeBackgroundFill = ShapeBackgroundFill(solidFill = fill),
+      outline = Outline(outlineFill = OutlineFill(solidFill = outline_col))
+    ),
+    fields = paste(
+      sep = ",",
+      "shapeBackgroundFill.solidFill.color",
+      "shapeBackgroundFill.solidFill.alpha",
+      "outline.outlineFill.solidFill.color",
+      "outline.outlineFill.solidFill.alpha"
+    )
+  )
+
+  add_request(state, shape_request)
+  add_request(state, update_style)
   state
-}
+  }
 
 gsd_rect <- function(args, state) {
   x0 <- args$x0
   y0 <- args$y0
   x1 <- args$x1
   y1 <- args$y1
+  rgba_fill <-  state$gc$fill / 255
+  rgba_col <-  state$gc$col / 255
 
   slide_element <- PageElementProperties(
     pageObjectId = state$rdata$slidepage_id,
@@ -40,15 +70,39 @@ gsd_rect <- function(args, state) {
     transform = AffineTransform(1, 1, 0, 0, x0, y1)
   )
 
+  rect_id <- new_id("RECT")
   shape_request <- CreateShapeRequest(
-    objectId = new_id("RECT"),
+    objectId = rect_id,
     shapeType = "RECTANGLE",
     elementProperties = slide_element
   )
 
-  i <- length(state$rdata$batch_requests)
-  state$rdata$batch_requests[[i + 1]] <- shape_request
+  fill <- SolidFill(
+    color = OpaqueColor(rgbColor = RgbColor(rgba_fill[1], rgba_fill[2], rgba_fill[3])),
+    alpha = rgba_fill[4]
+  )
+  outline_col <- SolidFill(
+    color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
+    alpha = rgba_col[4]
+    )
 
+  update_style <- UpdateShapePropertiesRequest(
+    objectId = rect_id,
+    shapeProperties = ShapeProperties(
+      shapeBackgroundFill = ShapeBackgroundFill(solidFill = fill),
+      outline = Outline(outlineFill = OutlineFill(solidFill = outline_col))
+    ),
+    fields = paste(
+      sep = ",",
+      "shapeBackgroundFill.solidFill.color",
+      "shapeBackgroundFill.solidFill.alpha",
+      "outline.outlineFill.solidFill.color",
+      "outline.outlineFill.solidFill.alpha"
+    )
+  )
+
+  add_request(state, shape_request)
+  # add_request(state, update_style)
   state
 }
 
@@ -57,6 +111,7 @@ gsd_line <- function(args, state) {
   y1 <- args$y1
   x2 <- args$x2
   y2 <- args$y2
+  rgba_col <-  state$gc$col / 255
 
   if (x1 == x2 && y1 == y2) return()
 
@@ -71,15 +126,30 @@ gsd_line <- function(args, state) {
     transform = AffineTransform(scale_x, scale_y, 0, 0, x1, y1)
   )
 
-  shape_request <- CreateLineRequest(
-    objectId = new_id("LINE"),
+  line_id <- new_id("LINE")
+  line_request <- CreateLineRequest(
+    objectId = line_id,
     category = "LINE_CATEGORY_UNSPECIFIED",
     elementProperties = slide_element
   )
 
-  i <- length(state$rdata$batch_requests)
-  state$rdata$batch_requests[[i + 1]] <- shape_request
+  line_update <- UpdateLinePropertiesRequest(
+    objectId = line_id,
+    lineProperties = LineProperties(
+      lineFill = LineFill(
+        solidFill = SolidFill(
+          color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
+          alpha = rgba_col[4]
+        ))
+    ),
+    # fields = "lineFill.solidFill.color.rgbColor(green,red,blue),lineFill.solidFill.alpha"
+    fields = "lineFill.solidFill.color"
+  )
 
+  add_request(state, line_request)
+  add_request(state, line_update)
+  line_update[["fields"]] <- "lineFill.solidFill.alpha"
+  add_request(state, line_update)
   state
 }
 
@@ -90,10 +160,10 @@ gsd_polyline <- function(args, state) {
   x <- args$x
   y <- args$y
   n <- args$n
+  rgba_col <-  state$gc$col / 255
 
   x = x[1:n]
   y = y[1:n]
-  request <-  NULL
 
   line_ids <- replicate(n-1, new_id("LINE"))
   for(i in seq_len(n-1)){
@@ -120,14 +190,27 @@ gsd_polyline <- function(args, state) {
       elementProperties = slide_element
     )
 
-    i <- length(state$rdata$batch_requests)
-    state$rdata$batch_requests[[i + 1]] <- line_request
+    line_update <- UpdateLinePropertiesRequest(
+      objectId = line_ids[i],
+      lineProperties = LineProperties(
+        lineFill = LineFill(
+          solidFill = SolidFill(
+            color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
+            alpha = rgba_col[4]
+          ))
+      ),
+      fields = "lineFill.solidFill.color"
+    )
+
+    add_request(state, line_request)
+    add_request(state, line_update)
+    line_update[["fields"]] <- "lineFill.solidFill.alpha"
+    add_request(state, line_update)
   }
 
   if (length(line_ids) > 1) {
     group_req <- GroupObjectsRequest(groupObjectId = new_id("GROUP"), line_ids)
-    i <- length(state$rdata$batch_requests)
-    state$rdata$batch_requests[[i + 1]] <- group_req
+    add_request(state, group_req)
   }
   state
 }
@@ -137,9 +220,60 @@ gsd_polygon <- function(args, state) {
   n <- args$n
   x <- c(args$x, args$x[1])
   y <- c(args$y, args$y[1])
+  rgba <-  state$gc$fill / 255
+  rgba_col <-  state$gc$col / 255
+
+  triangles <- triangular::decompose(data.frame(x = x, y = y, group=1, subgroup=1))
+  transforms <- lapply(split(triangles, triangles$idx), triangle_matrix)
+  triangle_ids <- replicate(length(transforms), new_id("RIGHT_TRI"))
+
+  for (i in seq_along(triangle_ids)) {
+    affine_mat <- transforms[[i]]
+
+    triangle_request <- CreateShapeRequest(
+      objectId = triangle_ids[i],
+      shapeType = "RIGHT_TRIANGLE",
+      elementProperties = PageElementProperties(
+        pageObjectId = state$rdata$slidepage_id,
+        size = Size(width = Dimension(1, "PT"), height = Dimension(1, "PT")),
+        transform = AffineTransform(
+          scaleX = affine_mat[1, 1],
+          scaleY = affine_mat[2, 2],
+          shearX = affine_mat[1, 2],
+          shearY = affine_mat[2, 1],
+          translateX = affine_mat[1, 3],
+          translateY = affine_mat[2, 3]
+        )
+      )
+    )
+    fill <- SolidFill(
+      color = OpaqueColor(rgbColor = RgbColor(rgba[1], rgba[2], rgba[3])),
+      alpha = rgba[4]
+    )
+    # outline_col <- Outline(outlineFill = OutlineFill(solidFill = SolidFill(alpha = 0)))
+    # outline_col <- Outline(outlineFill = OutlineFill(solidFill = fill),
+                           # weight = Dimension(magnitude = 1, unit = "EMU"))
+    outline_col <- Outline(propertyState = "NOT_RENDERED")
+
+    update_style <- UpdateShapePropertiesRequest(
+      objectId = triangle_ids[i],
+      shapeProperties = ShapeProperties(
+        shapeBackgroundFill = ShapeBackgroundFill(solidFill = fill),
+        outline = outline_col
+        ),
+      fields = "shapeBackgroundFill.solidFill.color,shapeBackgroundFill.solidFill.alpha,outline.propertyState"
+
+      # fields = "shapeBackgroundFill.solidFill.color,shapeBackgroundFill.solidFill.alpha,outline.outlineFill.solidFill.alpha,outline.outlineFill.solidFill.color,outline.weight"
+    )
+    add_request(state, triangle_request)
+    add_request(state, update_style)
+  }
+  if (length(triangle_ids) > 1) {
+    group_req <- GroupObjectsRequest(groupObjectId = new_id("GROUP"), triangle_ids)
+    add_request(state, group_req)
+  }
 
   line_ids <- replicate(n, new_id("LINE"))
-
   for(i in seq_len(n)){
     x1 <- x[i]
     y1 <- y[i]
@@ -162,14 +296,28 @@ gsd_polygon <- function(args, state) {
       elementProperties = slide_element
     )
 
-    i <- length(state$rdata$batch_requests)
-    state$rdata$batch_requests[[i + 1]] <- line_request
+    line_update <- UpdateLinePropertiesRequest(
+      objectId = line_ids[i],
+      lineProperties = LineProperties(
+        lineFill = LineFill(
+          solidFill = SolidFill(
+            color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
+            alpha = rgba_col[4]
+        ))
+      ),
+      fields = "lineFill.solidFill.color"
+    )
+
+    add_request(state, line_request)
+    add_request(state, line_update)
+    line_update[["fields"]] <- "lineFill.solidFill.alpha"
+    add_request(state, line_update)
+
   }
 
   if (length(line_ids) > 1) {
     group_req <- GroupObjectsRequest(groupObjectId = new_id("GROUP"), line_ids)
-    i <- length(state$rdata$batch_requests)
-    state$rdata$batch_requests[[i + 1]] <- group_req
+    add_request(state, group_req)
   }
   state
 }
@@ -180,7 +328,7 @@ gsd_textUTF8 <- function(args, state) {
   str <- args$str
   rot <- args$rot
   hadj <- args$hadj
-
+text_util(args, state)
   width <- nchar(str) * 15
   height <- 20
   affine_mat <- translate_matrix(x, y) %*%
@@ -209,8 +357,7 @@ gsd_textUTF8 <- function(args, state) {
     shapeType = "TEXT_BOX",
     elementProperties = slide_element
   )
-  i <- length(state$rdata$batch_requests)
-  state$rdata$batch_requests[[i + 1]] <- text_box_request
+  add_request(state, text_box_request)
 
   text_request <-
     InsertTextRequest(
@@ -218,7 +365,7 @@ gsd_textUTF8 <- function(args, state) {
       objectId = text_box_id,
       text = str
     )
-  state$rdata$batch_requests[[next_req(state)]] <- text_request
+  add_request(state, text_request)
 
   if (hadj >= 0.5) {
     text_alignment <- if (hadj == 0.5) {
@@ -232,10 +379,72 @@ gsd_textUTF8 <- function(args, state) {
       textRange = Range(type = "ALL"),
       fields = "alignment"
     )
-    state$rdata$batch_requests[[next_req(state)]] <- update_style
+    add_request(state, update_style)
   }
   state
 }
+
+
+gsd_raster <- function(args, state) {
+  raster_matrix <- matrix(args$raster, nrow = args$h, ncol = args$w)
+  # args$w
+  # args$h
+  x <- args$x
+  y <- args$y
+  args$width
+  args$height
+  args$rot
+  raster_ids <- matrix(replicate(args$h * args$w, new_id("RASTER")), nrow = args$h)
+
+  rect_w <- args$width / args$w
+  rect_h <- abs(args$height / args$h)
+  for (i in seq_len(args$h)) {
+    for (j in seq_len(args$w)) {
+      rect_x <- x + j * rect_w
+      rect_y <- y + i * rect_h
+      rgba_fill <- col2rgb(paste0("#", as.hexmode(raster_matrix[i, j])), TRUE)[, 1]
+
+      slide_element <- PageElementProperties(
+        pageObjectId = state$rdata$slidepage_id,
+        size = Size(width = Dimension(x1 - x0, "PT"), height = Dimension(y0 - y1, "PT")),
+        transform = AffineTransform(1, 1, 0, 0, rect_x, rect_y)
+      )
+
+      shape_request <- CreateShapeRequest(
+        objectId = raster_ids[i, j],
+        shapeType = "RECTANGLE",
+        elementProperties = slide_element
+      )
+
+      fill <- SolidFill(
+        color = OpaqueColor(rgbColor = RgbColor(rgba_fill[1], rgba_fill[2], rgba_fill[3])),
+        alpha = rgba_fill[4]
+      )
+      outline_col <- Outline(propertyState = "NOT_RENDERED")
+
+      update_style <- UpdateShapePropertiesRequest(
+        objectId = rect_id,
+        shapeProperties = ShapeProperties(
+          shapeBackgroundFill = ShapeBackgroundFill(solidFill = fill),
+          outline = outline_col
+        ),
+        fields = paste(
+          sep = ",",
+          "shapeBackgroundFill.solidFill.color",
+          "shapeBackgroundFill.solidFill.alpha",
+          "outline.propertyState"
+        )
+      )
+      add_request(state, shape_request)
+      add_request(state, update_style)
+    }
+  }
+  state
+}
+
+
+
+
 
 gsd_holdflush <- function(args, state) {
   print(paste0("level: ", args$level))
@@ -277,7 +486,8 @@ gsd_open <- function(args, state) {
   state$dd$bottom <- 400
   state$dd$canClip <- FALSE
   state$dd$canHAdj <- 2L
-
+  state$dd$haveRaster <- 1L
+  state$dd$ipr <- c(1/72, 1/72)
   state
 }
 
@@ -302,6 +512,7 @@ debug_gsd_function <- function(device_call, args, state) {
       "open" = gsd_open(args, state),
       "newPage" = gsd_newPage(args, state),
       "textUTF8" = gsd_textUTF8(args, state),
+      "raster" = gsd_raster(args, state),
       "holdflush" = gsd_holdflush(args, state),
       state
       )

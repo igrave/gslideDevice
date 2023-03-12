@@ -6,7 +6,13 @@ pt_to_emu <- function(pt) {
   pt * 12700
 }
 
+cm_to_pt <- function(cm) {
+  cm / 2.54 * 72
+}
 
+pt_to_cm <- function(pt) {
+  pt / 72 * 2.54
+}
 
 translate_matrix <- function(x, y){
   matrix(c(1,0,0,
@@ -56,4 +62,21 @@ rm_null_objs <- function(x) {
 
 next_req <- function(state) {
   length(state$rdata$batch_requests) + 1
+}
+
+
+
+text_util <- function(args, state) {
+  dpi      <- 1/state$dd$ipr[1]
+  fontsize <- state$gc$cex * state$gc$ps * dpi/72
+
+  metrics <- gdtools::str_extents(
+    args$str,
+    fontname = "sans",
+    fontsize = fontsize,
+    bold     = FALSE,
+    italic   = FALSE,
+    fontfile = ""
+  )
+  metrics / c(1, 0.6)
 }

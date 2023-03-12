@@ -15,3 +15,17 @@ send_request <- function(request, state) {
   )
   res
 }
+
+
+add_request <- function(state, request) {
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- request
+  state
+}
+
+
+`add_request<-` <- function(state, value){
+  i <- length(state$rdata$batch_requests)
+  state$rdata$batch_requests[[i + 1]] <- value
+  state
+}
