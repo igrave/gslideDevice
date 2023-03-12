@@ -386,7 +386,7 @@ text_util(args, state)
 
 
 gsd_raster <- function(args, state) {
-  raster_matrix <- matrix(args$raster, nrow = args$h, ncol = args$w)
+  raster_matrix <- matrix(rev(args$raster), nrow = args$w, ncol = args$h)
   # args$w
   # args$h
   x <- args$x
@@ -400,13 +400,13 @@ gsd_raster <- function(args, state) {
   rect_h <- abs(args$height / args$h)
   for (i in seq_len(args$h)) {
     for (j in seq_len(args$w)) {
-      rect_x <- x + j * rect_w
-      rect_y <- y + i * rect_h
-      rgba_fill <- col2rgb(paste0("#", as.hexmode(raster_matrix[i, j])), TRUE)[, 1]
+      rect_x <- x + (j - 1) * rect_w
+      rect_y <- y - (i) * rect_h
+      rgba_fill <- col2rgb(paste0("#", as.hexmode(raster_matrix[j, i])), TRUE)[4:1, 1]/255
 
       slide_element <- PageElementProperties(
         pageObjectId = state$rdata$slidepage_id,
-        size = Size(width = Dimension(x1 - x0, "PT"), height = Dimension(y0 - y1, "PT")),
+        size = Size(width = Dimension(rect_w, "PT"), height = Dimension(rect_h, "PT")),
         transform = AffineTransform(1, 1, 0, 0, rect_x, rect_y)
       )
 
@@ -423,7 +423,7 @@ gsd_raster <- function(args, state) {
       outline_col <- Outline(propertyState = "NOT_RENDERED")
 
       update_style <- UpdateShapePropertiesRequest(
-        objectId = rect_id,
+        objectId = raster_ids[i, j],
         shapeProperties = ShapeProperties(
           shapeBackgroundFill = ShapeBackgroundFill(solidFill = fill),
           outline = outline_col
