@@ -4,12 +4,12 @@
 \alias{RgbColor}
 \title{RgbColor Object}
 \usage{
-RgbColor(green = NULL, red = NULL, blue = NULL)
+RgbColor(red = NULL, green = NULL, blue = NULL)
 }
 \arguments{
-\item{green}{The green component of the color, from 0}
-
 \item{red}{The red component of the color, from 0}
+
+\item{green}{The green component of the color, from 0}
 
 \item{blue}{The blue component of the color, from 0}
 }

@@ -6,23 +6,23 @@
 Reads and writes Google Slides presentations.}
 \usage{
 UpdateParagraphStyleRequest(
-  cellLocation = NULL,
-  textRange = NULL,
   objectId = NULL,
-  fields = NULL,
-  style = NULL
+  cellLocation = NULL,
+  style = NULL,
+  textRange = NULL,
+  fields = NULL
 )
 }
 \arguments{
+\item{objectId}{The object ID of the shape or table with the text to be styled}
+
 \item{cellLocation}{The location of the cell in the table containing the paragraph(s) to style}
+
+\item{style}{The paragraph's style}
 
 \item{textRange}{The range of text containing the paragraph(s) to style}
 
-\item{objectId}{The object ID of the shape or table with the text to be styled}
-
 \item{fields}{The fields that should be updated}
-
-\item{style}{The paragraph's style}
 }
 \value{
 UpdateParagraphStyleRequest object

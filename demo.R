@@ -14,6 +14,7 @@ library(devout)
 gsd_auth("isaac.gravestock@gmail.com")
 # "SLIDES_API519334291_15"
 # rdevice(debug_gsd_function, slides_id = "1ha1lRjRlKQUH_G7vRnHdaT5MAz4QTWdc7pT_sAeRmKU", layout = "TITLE") #roche
+
 rdevice(debug_gsd_function, slides_id = "1k38RIlrzaKx2ASie9gzLl6zvZ6bnAGnNz6amY_WcS8w")
 
 gsd_auth("isaac.gravestock@gmail.com")

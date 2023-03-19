@@ -85,7 +85,7 @@ gsd_rect <- function(args, state) {
     color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
     alpha = rgba_col[4]
     )
-
+browser()
   update_style <- UpdateShapePropertiesRequest(
     objectId = rect_id,
     shapeProperties = ShapeProperties(
@@ -95,14 +95,14 @@ gsd_rect <- function(args, state) {
     fields = paste(
       sep = ",",
       "shapeBackgroundFill.solidFill.color",
-      "shapeBackgroundFill.solidFill.alpha",
-      "outline.outlineFill.solidFill.color",
-      "outline.outlineFill.solidFill.alpha"
+      "shapeBackgroundFill.solidFill.alpha"
     )
   )
 
   add_request(state, shape_request)
-  # add_request(state, update_style)
+  add_request(state, update_style)
+  update_style$fields <- "outline.outlineFill.solidFill.color,outline.outlineFill.solidFill.alpha"
+  add_request(state, update_style)
   state
 }
 
@@ -223,6 +223,13 @@ gsd_polygon <- function(args, state) {
   rgba <-  state$gc$fill / 255
   rgba_col <-  state$gc$col / 255
 
+  # check for rectanges
+  if (is_rectangle(args$x, args$y)) {
+    state <- gsd_rect(list(x0 = x[1], y0 = y[1], x1 = x[3], y1 = y[3]),
+             state)
+    return(state)
+  }
+
   triangles <- triangular::decompose(data.frame(x = x, y = y, group=1, subgroup=1))
   transforms <- lapply(split(triangles, triangles$idx), triangle_matrix)
   triangle_ids <- replicate(length(transforms), new_id("RIGHT_TRI"))
@@ -328,15 +335,15 @@ gsd_textUTF8 <- function(args, state) {
   str <- args$str
   rot <- args$rot
   hadj <- args$hadj
-text_util(args, state)
-  width <- nchar(str) * 15
-  height <- 20
-  affine_mat <- translate_matrix(x, y) %*%
-    rot_matrix(rot) %*%
-    translate_matrix(-width * hadj, -height)
+  extents <- text_util(args, state)
+  padding <- 7.25
+  width <- extents[1] + 2*padding
+  height <- extents[2] + 2*padding
 
-  print(paste0("hadj: ", hadj))
-  print(paste0("string: ", str))
+  affine_mat <-
+    translate_matrix(x, y) %*%
+    rot_matrix(rot) %*%
+    translate_matrix(- padding - extents[1] * hadj, - 6 - extents[2])
 
   slide_element <- PageElementProperties(
     pageObjectId = state$rdata$slidepage_id,
@@ -367,6 +374,18 @@ text_util(args, state)
     )
   add_request(state, text_request)
 
+
+  text_style_request <- UpdateTextStyleRequest(
+    objectId = text_box_id,
+    style = TextStyle(fontSize = Dimension(
+      magnitude = state$gc$cex * state$gc$ps,
+      unit = "PT"
+    )),
+    textRange = Range(type = "ALL"),
+    fields = "fontSize"
+  )
+  add_request(state, text_style_request)
+
   if (hadj >= 0.5) {
     text_alignment <- if (hadj == 0.5) {
       "CENTER"
@@ -386,7 +405,8 @@ text_util(args, state)
 
 
 gsd_raster <- function(args, state) {
-  raster_matrix <- matrix(rev(args$raster), nrow = args$w, ncol = args$h)
+  # raster_matrix <- matrix(rev(args$raster), nrow = args$w, ncol = args$h)
+  raster_matrix <- matrix(args$raster, nrow = args$w, ncol = args$h)
   # args$w
   # args$h
   x <- args$x
@@ -401,7 +421,8 @@ gsd_raster <- function(args, state) {
   for (i in seq_len(args$h)) {
     for (j in seq_len(args$w)) {
       rect_x <- x + (j - 1) * rect_w
-      rect_y <- y - (i) * rect_h
+      # rect_y <- y - (i) * rect_h
+      rect_y <- y + args$height + (i-1) * rect_h
       rgba_fill <- col2rgb(paste0("#", as.hexmode(raster_matrix[j, i])), TRUE)[4:1, 1]/255
 
       slide_element <- PageElementProperties(
@@ -483,7 +504,7 @@ gsd_open <- function(args, state) {
   state$dd$left <- 0
   state$dd$top <- 0
   state$dd$right <- 720
-  state$dd$bottom <- 400
+  state$dd$bottom <- 405
   state$dd$canClip <- FALSE
   state$dd$canHAdj <- 2L
   state$dd$haveRaster <- 1L
@@ -491,9 +512,64 @@ gsd_open <- function(args, state) {
   state
 }
 
+gsd_strWidthUTF8 <- function(args, state) {
+   dpi      <- 1/state$dd$ipr[1]
+  fontsize <- state$gc$cex * state$gc$ps * dpi/72
 
+  metrics <- gdtools::str_metrics(
+    args$str,
+    fontname = "sans",
+    fontsize = fontsize,
+    bold     = FALSE,
+    italic   = FALSE,
+    fontfile = ""
+  )
+
+  state$width <- metrics[['width']]
+
+  state
+}
+
+
+# see https://github.com/coolbutuseless/devoutrgl/blob/a861efc382053144a15e746b5b8e1b3b4b2e8879/R/rgl-text.R#L43
+gsd_metricInfo <- function(args, state) {
+  dpi      <- 1/state$dd$ipr[1]
+  fontsize <- state$gc$cex * state$gc$ps * dpi/72
+
+  cint <- abs(args$c)
+  str  <- intToUtf8(cint)
+
+  metrics  <- gdtools::str_metrics(
+    str,
+    fontname = "sans",
+    fontsize = fontsize,
+    bold     = FALSE,
+    italic   = FALSE,
+    fontfile = ""
+  )
+
+  state$ascent  <-  metrics[['ascent' ]]
+  state$descent <-  metrics[['descent']]
+  state$width   <-  metrics[['width'  ]]
+
+  state
+}
+
+
+#' Title
+#'
+#' @param device_call
+#' @param args
+#' @param state
+#'
+#' @return
+#' @export
+#' @import devout
+#' @examples
 debug_gsd_function <- function(device_call, args, state) {
-  if (device_call %in% c('mode', 'strWidthUTF8', 'metricInfo')) return()
+  # if (device_call %in% c('mode', 'strWidthUTF8', 'metricInfo')) return()
+  if (device_call %in% c('mode', 'strWidthUTF8')) return()
+
   cat("[", device_call, "]\n")
   # cat(paste(names(args), args, sep = " = ", collapse = ",  "), "\n", sep = "")
 
@@ -504,6 +580,8 @@ debug_gsd_function <- function(device_call, args, state) {
   tryCatch({
     state <- switch(
       device_call,
+      "strWidthUTF8" = gsd_strWidthUTF8(args, state),
+      "metricInfo" = gsd_metricInfo(args, state),
       "line"  = gsd_line (args, state),
       "polyline" = gsd_polyline(args, state),
       "circle" = gsd_circle(args, state),

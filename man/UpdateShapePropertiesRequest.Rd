@@ -5,17 +5,17 @@
 \title{UpdateShapePropertiesRequest Object}
 \usage{
 UpdateShapePropertiesRequest(
-  fields = NULL,
+  objectId = NULL,
   shapeProperties = NULL,
-  objectId = NULL
+  fields = NULL
 )
 }
 \arguments{
-\item{fields}{The fields that should be updated}
+\item{objectId}{The object ID of the shape the updates are applied to}
 
 \item{shapeProperties}{The shape properties to update}
 
-\item{objectId}{The object ID of the shape the updates are applied to}
+\item{fields}{The fields that should be updated}
 }
 \value{
 UpdateShapePropertiesRequest object
