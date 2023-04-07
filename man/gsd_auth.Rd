@@ -7,8 +7,7 @@
 gsd_auth(
   email = gargle::gargle_oauth_email(),
   path = NULL,
-  scopes = c("https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/drive.file",
+  scopes = c("https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/presentations"),
   cache = gargle::gargle_oauth_cache(),
   use_oob = gargle::gargle_oob_default(),

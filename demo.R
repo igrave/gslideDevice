@@ -10,12 +10,12 @@ library(devout)
 # a <- create_slides("Compare")
 # request_rgs <- rgoogleslides::add_create_slide_page_request()
 # commit_to_slides(a, request)
-
-gsd_auth("isaac.gravestock@gmail.com")
+debug(gsd_auth)
+gsd_auth("isaac.gravaestock@gmail.com")
 # "SLIDES_API519334291_15"
 # rdevice(debug_gsd_function, slides_id = "1ha1lRjRlKQUH_G7vRnHdaT5MAz4QTWdc7pT_sAeRmKU", layout = "TITLE") #roche
 
-rdevice(debug_gsd_function, slides_id = "1k38RIlrzaKx2ASie9gzLl6zvZ6bnAGnNz6amY_WcS8w")
+rdevice(gsd_function, slides_id = "1k38RIlrzaKx2ASie9gzLl6zvZ6bnAGnNz6amY_WcS8w")
 
 gsd_auth("isaac.gravestock@gmail.com")
 plot(1:4)
@@ -47,3 +47,27 @@ image <- as.raster(matrix(hcl(0, 80, seq(50, 80, 10)), nrow = 4, ncol = 5))
 rasterImage(image, 100, 300, 150, 350, interpolate = FALSE)
 grDevices::dev.flush()
 debug(gsd_raster)
+
+
+select_slides <- function() {
+  server <- httpuv::startServer(
+    host = "127.0.0.1",port = 1083,
+    app = list(
+      staticPaths = list("index.html" = "inst/picker.html"),
+      call = function(req) {
+        auth_slide_id <<- sub("?slides=", "", req$QUERY_STRING)
+        list(
+          status = 200L,
+          headers = list(
+            'Content-Type' = 'text/html'
+          ),
+          body = "Hello world!"
+        )
+      }
+    )
+  )
+  on.exit(httpuv::stopServer(server))
+  auth_slide_id
+}
+rstudioapi::viewer("http://127.0.0.1:1083/index.html")
+

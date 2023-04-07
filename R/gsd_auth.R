@@ -49,7 +49,6 @@ gargle_lookup_table <- list(
 gsd_auth <- function(email = gargle::gargle_oauth_email(),
                     path = NULL,
                     scopes = c(
-                      "https://www.googleapis.com/auth/drive",
                       "https://www.googleapis.com/auth/drive.file",
                       "https://www.googleapis.com/auth/presentations"
                       ),

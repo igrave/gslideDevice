@@ -85,7 +85,7 @@ gsd_rect <- function(args, state) {
     color = OpaqueColor(rgbColor = RgbColor(rgba_col[1], rgba_col[2], rgba_col[3])),
     alpha = rgba_col[4]
     )
-browser()
+
   update_style <- UpdateShapePropertiesRequest(
     objectId = rect_id,
     shapeProperties = ShapeProperties(
@@ -101,8 +101,8 @@ browser()
 
   add_request(state, shape_request)
   add_request(state, update_style)
-  update_style$fields <- "outline.outlineFill.solidFill.color,outline.outlineFill.solidFill.alpha"
-  add_request(state, update_style)
+  # update_style$fields <- "outline.outlineFill.solidFill.color,outline.outlineFill.solidFill.alpha"
+  # add_request(state, update_style)
   state
 }
 
@@ -556,17 +556,8 @@ gsd_metricInfo <- function(args, state) {
 }
 
 
-#' Title
-#'
-#' @param device_call
-#' @param args
-#' @param state
-#'
-#' @return
-#' @export
-#' @import devout
-#' @examples
-debug_gsd_function <- function(device_call, args, state) {
+
+gsd_function <- function(device_call, args, state) {
   # if (device_call %in% c('mode', 'strWidthUTF8', 'metricInfo')) return()
   if (device_call %in% c('mode', 'strWidthUTF8')) return()
 
@@ -604,3 +595,17 @@ debug_gsd_function <- function(device_call, args, state) {
   state
 }
 
+
+#' Title
+#'
+#' @param device_call
+#' @param args
+#' @param state
+#'
+#' @return
+#' @export
+#' @import devout
+#' @examples
+gslideDevice <- function(slides_id, layout,  ...) {
+  rdevice(gsd_function, slides_id = slides_id, layout = layout, ...)
+}
